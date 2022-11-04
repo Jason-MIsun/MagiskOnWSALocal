@@ -133,6 +133,7 @@ GAPPS_BRAND_MAP=(
 )
 
 GAPPS_VARIANT_MAP=(
+    "none"
     "super"
     "stock"
     "full"
