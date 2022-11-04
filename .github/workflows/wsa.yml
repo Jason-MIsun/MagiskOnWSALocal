@@ -32,6 +32,15 @@ on:
         - beta
         - canary
         - debug
+      gapps_brand:
+        description: "Gapp brand"
+        required: true
+        default: "OpenGApps"
+        type: choice
+        options:
+          - OpenGApps
+          - none
+          - MindTheGApps
       gapps_variant:
         description: "Variants of gapps /Gapps版本"
         required: true
@@ -51,7 +60,7 @@ on:
       remove_amazon:
         description: "移除亚马逊商店"
         required: true
-        default: "keep"
+        default: "remove"
         type: choice
         options:
         - keep
@@ -103,6 +112,7 @@ jobs:
           ARCH: ${{ matrix.arch }}
           RELEASE_TYPE: ${{ github.event.inputs.release_type }}
           MAGISK_VER: ${{ github.event.inputs.magisk_apk }}
+          GAPPS_BRAND: ${{ github.event.inputs.gapps_brand }}
           GAPPS_VARIANT: ${{ github.event.inputs.gapps_variant }}
           REMOVE_AMAZON: ${{ github.event.inputs.remove_amazon }}
           ROOT_SOL: ${{ github.event.inputs.root_sol }}
