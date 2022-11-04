@@ -137,28 +137,18 @@ function YesNoBox {
     $DIALOG --title "${o[title]}" --yesno "${o[text]}" 0 0
 }
 
-if [ GAPPS_VARIANT != "none" ]; then
-    echo "Gapps variant is not none! Set Gapps brand is OpenGaps"
-    GAPPS_BRAND="OpenGApps"
-fi
-
 COMPRESS_OUTPUT="--compress"
 
 declare -A RELEASE_TYPE_MAP=(["retail"]="retail" ["release preview"]="RP" ["insider slow"]="WIS" ["insider fast"]="WIF")
 
-echo "检查Gapps是否需要"
-echo $GAPPS_VARIANT
-echo $GAPPS_BRAND
-
+echo "检查GAPPS是否需要"
 if [ $GAPPS_VARIANT == "none" ]; then
+    echo " Gapps is none, Set gapps brand gone!"
     COMMAND_LINE=(--arch "$ARCH" --release-type "${RELEASE_TYPE_MAP[$RELEASE_TYPE]}" --magisk-ver "$MAGISK_VER" --gapps-variant "$GAPPS_VARIANT" "$REMOVE_AMAZON" --root-sol "$ROOT_SOL" "$COMPRESS_OUTPUT" "$OFFLINE" "$DEBUG" "$CUSTOM_MAGISK" --debug)
-    echo " Gapps is none"
-fi
-
-if [ GAPPS_VARIANT != "none" ]; then
+elif [ $GAPPS_VARIANT != "none" ]; then
     COMMAND_LINE=(--arch "$ARCH" --release-type "${RELEASE_TYPE_MAP[$RELEASE_TYPE]}" --magisk-ver "$MAGISK_VER" --gapps-brand "$GAPPS_BRAND" --gapps-variant "$GAPPS_VARIANT" "$REMOVE_AMAZON" --root-sol "$ROOT_SOL" "$COMPRESS_OUTPUT" "$OFFLINE" "$DEBUG" "$CUSTOM_MAGISK" --debug)
 fi
 
-echo "命令行检查\n COMMAND_LINE=${COMMAND_LINE[*]}"
-echo "编译！"
-##./build.sh "${COMMAND_LINE[@]}"
+echo "命令行检查 COMMAND_LINE=${COMMAND_LINE[*]}"
+echo "开始编译！"
+./build.sh "${COMMAND_LINE[@]}"
