@@ -150,7 +150,7 @@ echo "检查Gapps是否需要"
 echo $GAPPS_VARIANT
 echo $GAPPS_BRAND
 
-if [ GAPPS_VARIANT == "none" ]; then
+if [ $GAPPS_VARIANT == "none" ]; then
     COMMAND_LINE=(--arch "$ARCH" --release-type "${RELEASE_TYPE_MAP[$RELEASE_TYPE]}" --magisk-ver "$MAGISK_VER" --gapps-variant "$GAPPS_VARIANT" "$REMOVE_AMAZON" --root-sol "$ROOT_SOL" "$COMPRESS_OUTPUT" "$OFFLINE" "$DEBUG" "$CUSTOM_MAGISK" --debug)
     echo " Gapps is none"
 fi
