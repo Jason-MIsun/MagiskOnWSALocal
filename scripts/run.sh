@@ -161,4 +161,4 @@ fi
 
 echo "命令行检查\n COMMAND_LINE=${COMMAND_LINE[*]}"
 echo "编译！"
-./build.sh "${COMMAND_LINE[@]}"
+##./build.sh "${COMMAND_LINE[@]}"
