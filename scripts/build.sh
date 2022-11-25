@@ -646,11 +646,9 @@ if [ "$GAPPS_BRAND" != 'none' ]; then
     echo -e "Integrate $GAPPS_BRAND done\n"
 fi
 
-if [ "$GAPPS_BRAND" != 'none' ]; then
-    echo "Fix $GAPPS_BRAND prop"
-    $SUDO python3 fixGappsProp.py "$MOUNT_DIR" || abort
-    echo -e "done\n"
-fi
+echo "Fix $GAPPS_BRAND prop"
+$SUDO python3 fixGappsProp.py "$MOUNT_DIR" || abort
+echo -e "done\n"
 
 echo "Umount images"
 $SUDO find "$MOUNT_DIR" -exec touch -hamt 200901010000.00 {} \;
