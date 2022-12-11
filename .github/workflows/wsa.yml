@@ -124,7 +124,7 @@ jobs:
           
       - id: vars
         run: |
-          echo "::set-output name=sha_short::$(git rev-parse --short "$GITHUB_SHA")"
+          echo "::set-output name=sha_short::$(date)"
       
       - uses: mukunku/tag-exists-action@v1.0.0
         id: checkTag
