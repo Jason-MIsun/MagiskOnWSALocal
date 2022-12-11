@@ -124,7 +124,7 @@ jobs:
           
       - id: vars
         run: |
-          echo "::set-output name=sha_short::$(date)"
+          echo "::set-output name=sha_short::$(date +%Y_%m_%d-%H:%M)"
       
       - uses: mukunku/tag-exists-action@v1.0.0
         id: checkTag
