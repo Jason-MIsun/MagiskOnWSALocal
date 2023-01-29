@@ -124,7 +124,8 @@ jobs:
           
       - id: vars
         run: |
-          echo "sha_short={date +%Y%m%d%H%M}" >> $GITHUB_OUTPUT
+          tag_name=$(date +%Y%m%d%H%M)
+          echo "sha_short={$tag_name}" >> $GITHUB_OUTPUT
       
       - uses: mukunku/tag-exists-action@v1.0.0
         id: checkTag
