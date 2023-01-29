@@ -119,8 +119,9 @@ jobs:
         run: |
           ./scripts/run.sh
           path=$(find ./output -name "*.7z"|head -n 1)
-          echo "path={$path}" >> $GITHUB_OUTPUT
-          echo "name={basename $path}" >> $GITHUB_OUTPUT
+          name=basename $path
+          echo "path=$path" >> $GITHUB_OUTPUT
+          echo "name=$name" >> $GITHUB_OUTPUT
           
       - id: vars
         run: |
