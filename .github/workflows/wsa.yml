@@ -118,10 +118,15 @@ jobs:
           ROOT_SOL: ${{ github.event.inputs.root_sol }}
         run: |
           ./scripts/run.sh
+          echo "Build is done.Preparing..."
           path=$(find ./output -name "*.7z"|head -n 1)
-          name=basename $path
+          echo $path
+          name=$(basename $path)
+          echo $name
+          echo "Setting github output"
           echo "path=$path" >> $GITHUB_OUTPUT
           echo "name=$name" >> $GITHUB_OUTPUT
+          echo "OK, ALL IS DONE"
           
       - id: vars
         run: |
