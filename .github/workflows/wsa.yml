@@ -119,12 +119,12 @@ jobs:
         run: |
           ./scripts/run.sh
           path=$(find ./output -name "*.7z"|head -n 1)
-          echo "{path}={$path}" >> $GITHUB_OUTPUT
-          echo "{name}={basename $path}" >> $GITHUB_OUTPUT
+          echo "path=${{path}}" >> $GITHUB_OUTPUT
+          echo "name={basename $path}" >> $GITHUB_OUTPUT
           
       - id: vars
         run: |
-          echo "{sha_short}={date +%Y%m%d%H%M}" >> $GITHUB_OUTPUT
+          echo "sha_short=${{date +%Y%m%d%H%M}}" >> $GITHUB_OUTPUT
       
       - uses: mukunku/tag-exists-action@v1.0.0
         id: checkTag
