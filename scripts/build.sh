@@ -445,24 +445,32 @@ echo "Convert vhdx to img and remove read-only flag"
     vhdx_to_img "$WORK_DIR/wsa/$ARCH/vendor.vhdx" "$WORK_DIR/wsa/$ARCH/vendor.img" || abort
 echo -e "Convert vhdx to img and remove read-only flag done\n"
 
+echo "Delect vhdx"
+    rm -rf "$WORK_DIR/wsa/$ARCH/system_ext.vhdx"
+    rm -rf "$WORK_DIR/wsa/$ARCH/product.vhdx"
+    rm -rf "$WORK_DIR/wsa/$ARCH/system.vhdx"
+    rm -rf "$WORK_DIR/wsa/$ARCH/vendor.vhdx"
+echo "Delect Done!"
+    df -h
+    
 echo "Expand images"
 if [ ! -f /etc/mtab ]; then $SUDO ln -s /proc/self/mounts /etc/mtab; fi
 e2fsck -pf "$WORK_DIR"/wsa/"$ARCH"/system_ext.img || abort
-SYSTEM_EXT_SIZE=$(($(du --apparent-size -sB512 "$WORK_DIR"/wsa/"$ARCH"/system_ext.img | cut -f1) + 20000))
+SYSTEM_EXT_SIZE=$(($(du --apparent-size -sB512 "$WORK_DIR"/wsa/"$ARCH"/system_ext.img | cut -f1) + 50000))
 if [ -d "$WORK_DIR"/gapps/system_ext ]; then
     SYSTEM_EXT_SIZE=$(( SYSTEM_EXT_SIZE + $(du --apparent-size -sB512 "$WORK_DIR"/gapps/system_ext | cut -f1) ))
 fi
 resize2fs "$WORK_DIR"/wsa/"$ARCH"/system_ext.img "$SYSTEM_EXT_SIZE"s || abort
 
 e2fsck -pf "$WORK_DIR"/wsa/"$ARCH"/product.img || abort
-PRODUCT_SIZE=$(($(du --apparent-size -sB512 "$WORK_DIR"/wsa/"$ARCH"/product.img | cut -f1) + 20000))
+PRODUCT_SIZE=$(($(du --apparent-size -sB512 "$WORK_DIR"/wsa/"$ARCH"/product.img | cut -f1) + 50000))
 if [ -d "$WORK_DIR"/gapps/product ]; then
     PRODUCT_SIZE=$(( PRODUCT_SIZE + $(du --apparent-size -sB512 "$WORK_DIR"/gapps/product | cut -f1) ))
 fi
 resize2fs "$WORK_DIR"/wsa/"$ARCH"/product.img "$PRODUCT_SIZE"s || abort
 
 e2fsck -pf "$WORK_DIR"/wsa/"$ARCH"/system.img || abort
-SYSTEM_SIZE=$(($(du --apparent-size -sB512 "$WORK_DIR"/wsa/"$ARCH"/system.img | cut -f1) + 20000))
+SYSTEM_SIZE=$(($(du --apparent-size -sB512 "$WORK_DIR"/wsa/"$ARCH"/system.img | cut -f1) + 50000))
 if [ -d "$WORK_DIR"/gapps ]; then
     SYSTEM_SIZE=$(( SYSTEM_SIZE + $(du --apparent-size -sB512 "$WORK_DIR"/gapps | cut -f1) - $(du --apparent-size -sB512 "$WORK_DIR"/gapps/product | cut -f1) ))
     if [ -d "$WORK_DIR"/gapps/system_ext ]; then
@@ -481,7 +489,7 @@ fi
 resize2fs "$WORK_DIR"/wsa/"$ARCH"/system.img "$SYSTEM_SIZE"s || abort
 
 e2fsck -pf "$WORK_DIR"/wsa/"$ARCH"/vendor.img || abort
-VENDOR_SIZE=$(($(du --apparent-size -sB512 "$WORK_DIR"/wsa/"$ARCH"/vendor.img | cut -f1) + 20000))
+VENDOR_SIZE=$(($(du --apparent-size -sB512 "$WORK_DIR"/wsa/"$ARCH"/vendor.img | cut -f1) + 50000))
 resize2fs "$WORK_DIR"/wsa/"$ARCH"/vendor.img "$VENDOR_SIZE"s || abort
 echo -e "Expand images done\n"
 
