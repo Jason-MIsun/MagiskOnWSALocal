@@ -107,6 +107,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
+      - id: Install depts
+        run: |
+          ./scripts/install_depts.sh
+          
+      - id: Cache depts
+        with: 
+          cache: true
+      
       - id: run
         env:
           ARCH: ${{ matrix.arch }}
