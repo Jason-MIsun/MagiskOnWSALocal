@@ -101,6 +101,25 @@ default() {
     ROOT_SOL=magisk
 }
 
+resize_img() {
+    e2fsck -pf "$1" || return 1
+    if [ "$2" ]; then
+        resize2fs "$1" "$2" || return 1
+    else
+        resize2fs -M "$1" || return 1
+    fi
+    return 0
+}
+
+vhdx_to_img() {
+    qemu-img convert -q -f vhdx -O raw "$1" "$2" || return 1
+    resize_img "$2" "$(($(du --apparent-size -sB512 "$2" | cut -f1) * 2))"s || return 1
+    e2fsck -fp -E unshare_blocks "$2" || return 1
+    resize_img "$2" || return 1
+    rm -f "$1" || return 1
+    return 0
+}
+
 exit_with_message() {
     echo "ERROR: $1"
     usage
@@ -418,6 +437,13 @@ if [ "$GAPPS_BRAND" != 'none' ]; then
     fi
     echo -e "Extract done\n"
 fi
+
+echo "Convert vhdx to img and remove read-only flag"
+    vhdx_to_img "$WORK_DIR/wsa/$ARCH/system_ext.vhdx" "$WORK_DIR/wsa/$ARCH/system_ext.img" || abort
+    vhdx_to_img "$WORK_DIR/wsa/$ARCH/product.vhdx" "$WORK_DIR/wsa/$ARCH/product.img" || abort
+    vhdx_to_img "$WORK_DIR/wsa/$ARCH/system.vhdx" "$WORK_DIR/wsa/$ARCH/system.img" || abort
+    vhdx_to_img "$WORK_DIR/wsa/$ARCH/vendor.vhdx" "$WORK_DIR/wsa/$ARCH/vendor.img" || abort
+echo -e "Convert vhdx to img and remove read-only flag done\n"
 
 echo "Expand images"
 if [ ! -f /etc/mtab ]; then $SUDO ln -s /proc/self/mounts /etc/mtab; fi
