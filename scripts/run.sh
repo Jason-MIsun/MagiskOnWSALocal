@@ -52,6 +52,7 @@ check_dependencies() {
     command -v aria2c >/dev/null 2>&1 || NEED_INSTALL+=("aria2")
     command -v 7z > /dev/null 2>&1 || NEED_INSTALL+=("p7zip-full")
     command -v setfattr > /dev/null 2>&1 || NEED_INSTALL+=("attr")
+    command -v qemu-img >/dev/null 2>&1 || NEED_INSTALL+=("qemu-utils")
 }
 check_dependencies
 osrel=$(sed -n '/^ID_LIKE=/s/^.*=//p' /etc/os-release);
