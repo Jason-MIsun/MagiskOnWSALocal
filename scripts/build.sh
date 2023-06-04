@@ -175,10 +175,16 @@ ro_ext4_img_to_rw() {
 }
 
 mount_erofs() {
-    if [ "$EROFS_USE_FUSE" ]; then
-        sudo "../bin/$HOST_ARCH/fuse.erofs" "$1" "$2" || return 1
-    else
         sudo mount -v -t erofs -o ro,loop "$1" "$2" || return 1
+}
+
+mk_erofs_umount() { # dir imgpath upperdir
+    sudo "../bin/$HOST_ARCH/mkfs.erofs" -zlz4hc -T1230768000 --chunksize=4096 --exclude-regex="lost+found" "$2".erofs "$1" || abort "Failed to make erofs image from $1"
+    sudo umount -v "$1"
+    sudo rm -f "$2"
+    sudo mv "$2".erofs "$2"
+    if [ "$3" ]; then
+        sudo rm -rf "$3"
     fi
 }
 
@@ -769,6 +775,19 @@ echo "Fix $GAPPS_BRAND prop"
 $SUDO python3 fixGappsProp.py "$MOUNT_DIR" || abort
 echo -e "done\n"
 
+    echo "Create EROFS images"
+    mk_erofs_umount "$VENDOR_MNT" "$WORK_DIR/wsa/$ARCH/vendor.img" "$VENDOR_MNT_RW" || abort
+    mk_erofs_umount "$PRODUCT_MNT" "$WORK_DIR/wsa/$ARCH/product.img" "$PRODUCT_MNT_RW" || abort
+    mk_erofs_umount "$SYSTEM_EXT_MNT" "$WORK_DIR/wsa/$ARCH/system_ext.img" "$SYSTEM_EXT_MNT_RW" || abort
+    mk_erofs_umount "$ROOT_MNT" "$WORK_DIR/wsa/$ARCH/system.img" || abort
+    echo -e "Create EROFS images done\n"
+    echo "Umount images"
+    sudo umount -v "$VENDOR_MNT_RO"
+    sudo umount -v "$PRODUCT_MNT_RO"
+    sudo umount -v "$SYSTEM_EXT_MNT_RO"
+    sudo umount -v "$ROOT_MNT_RO"
+    echo -e "done\n"
+    
 echo "Umount images"
 $SUDO find "$MOUNT_DIR" -exec touch -hamt 200901010000.00 {} \;
 $SUDO umount "$MOUNT_DIR"/vendor
