@@ -53,7 +53,7 @@ PRODUCT_MNT_RW="$ROOT_MNT_RW/product"
 SYSTEM_EXT_MNT_RW="$ROOT_MNT_RW/system_ext"
 SYSTEM_MNT_RW="$ROOT_MNT_RW/system"
 
-EROFS_USE_FUSE=1
+EROFS_USE_FUSE=0
 
 if [ -z "$SUDO" ]; then
     unset SUDO
