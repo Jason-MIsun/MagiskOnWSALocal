@@ -50,6 +50,7 @@ check_dependencies() {
     command -v resize2fs >/dev/null 2>&1 || NEED_INSTALL+=("e2fsprogs")
     command -v pip >/dev/null 2>&1 || NEED_INSTALL+=("python3-pip")
     command -v aria2c >/dev/null 2>&1 || NEED_INSTALL+=("aria2")
+    command -v erofs-utils >/dev/null 2>&1 || NEED_INSTALL+=("erofs-utils")
     command -v 7z > /dev/null 2>&1 || NEED_INSTALL+=("p7zip-full")
     command -v setfattr > /dev/null 2>&1 || NEED_INSTALL+=("attr")
     command -v qemu-img >/dev/null 2>&1 || NEED_INSTALL+=("qemu-utils")
