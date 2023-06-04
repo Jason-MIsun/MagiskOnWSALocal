@@ -39,6 +39,22 @@ DOWNLOAD_CONF_NAME=download.list
 OUTPUT_DIR=../output
 MOUNT_DIR="$WORK_DIR"/system
 SUDO="$(which sudo 2>/dev/null)"
+
+# lowerdir
+ROOT_MNT_RO="$WORK_DIR/erofs"
+VENDOR_MNT_RO="$ROOT_MNT_RO/vendor"
+PRODUCT_MNT_RO="$ROOT_MNT_RO/product"
+SYSTEM_EXT_MNT_RO="$ROOT_MNT_RO/system_ext"
+
+# upperdir
+ROOT_MNT_RW="$WORK_DIR/upper"
+VENDOR_MNT_RW="$ROOT_MNT_RW/vendor"
+PRODUCT_MNT_RW="$ROOT_MNT_RW/product"
+SYSTEM_EXT_MNT_RW="$ROOT_MNT_RW/system_ext"
+SYSTEM_MNT_RW="$ROOT_MNT_RW/system"
+
+EROFS_USE_FUSE=1
+
 if [ -z "$SUDO" ]; then
     unset SUDO
 fi
@@ -113,11 +129,57 @@ resize_img() {
 
 vhdx_to_img() {
     qemu-img convert -q -f vhdx -O raw "$1" "$2" || return 1
-    resize_img "$2" "$(($(du --apparent-size -sB512 "$2" | cut -f1) * 2))"s || return 1
-    e2fsck -fp -E unshare_blocks "$2" || return 1
-    resize_img "$2" || return 1
     rm -f "$1" || return 1
     return 0
+}
+
+mk_overlayfs() { # label lowerdir upperdir merged
+    local context own
+    local workdir="$WORK_DIR/worker/$1"
+    local lowerdir="$2"
+    local upperdir="$3"
+    local merged="$4"
+
+    echo "mk_overlayfs: label $1
+        lowerdir=$lowerdir
+        upperdir=$upperdir
+        workdir=$workdir
+        merged=$merged"
+    sudo mkdir -p -m 755 "$workdir" "$upperdir" "$merged"
+    case "$1" in
+        vendor)
+            context="u:object_r:vendor_file:s0"
+            own="0:2000"
+            ;;
+        system)
+            context="u:object_r:rootfs:s0"
+            own="0:0"
+            ;;
+        *)
+            context="u:object_r:system_file:s0"
+            own="0:0"
+            ;;
+    esac
+    sudo chown -R "$own" "$upperdir" "$workdir" "$merged"
+    sudo setfattr -n security.selinux -v "$context" "$upperdir"
+    sudo setfattr -n security.selinux -v "$context" "$workdir"
+    sudo setfattr -n security.selinux -v "$context" "$merged"
+    sudo mount -vt overlay overlay -olowerdir="$lowerdir",upperdir="$upperdir",workdir="$workdir" "$merged"
+}
+
+ro_ext4_img_to_rw() {
+    resize_img "$1" "$(($(du --apparent-size -sB512 "$1" | cut -f1) * 2))"s || return 1
+    e2fsck -fp -E unshare_blocks "$1" || return 1
+    resize_img "$1" || return 1
+    return 0
+}
+
+mount_erofs() {
+    if [ "$EROFS_USE_FUSE" ]; then
+        sudo "../bin/$HOST_ARCH/fuse.erofs" "$1" "$2" || return 1
+    else
+        sudo mount -v -t erofs -o ro,loop "$1" "$2" || return 1
+    fi
 }
 
 exit_with_message() {
@@ -445,6 +507,29 @@ echo "Convert vhdx to img and remove read-only flag"
     vhdx_to_img "$WORK_DIR/wsa/$ARCH/vendor.vhdx" "$WORK_DIR/wsa/$ARCH/vendor.img" || abort
 echo -e "Convert vhdx to img and remove read-only flag done\n"
 
+echo "Mount images"
+    sudo mkdir -p -m 755 "$ROOT_MNT_RO" || abort
+    sudo chown "0:0" "$ROOT_MNT_RO" || abort
+    sudo setfattr -n security.selinux -v "u:object_r:rootfs:s0" "$ROOT_MNT_RO" || abort
+    mount_erofs "$WORK_DIR/wsa/$ARCH/system.img" "$ROOT_MNT_RO" || abort
+    mount_erofs "$WORK_DIR/wsa/$ARCH/vendor.img" "$VENDOR_MNT_RO" || abort
+    mount_erofs "$WORK_DIR/wsa/$ARCH/product.img" "$PRODUCT_MNT_RO" || abort
+    mount_erofs "$WORK_DIR/wsa/$ARCH/system_ext.img" "$SYSTEM_EXT_MNT_RO" || abort
+    echo -e "done\n"
+    echo "Create overlayfs for EROFS"
+    mk_overlayfs system "$ROOT_MNT_RO" "$SYSTEM_MNT_RW" "$ROOT_MNT" || abort 
+    mk_overlayfs vendor "$VENDOR_MNT_RO" "$VENDOR_MNT_RW" "$VENDOR_MNT" || abort
+    mk_overlayfs product "$PRODUCT_MNT_RO" "$PRODUCT_MNT_RW" "$PRODUCT_MNT" || abort
+    mk_overlayfs system_ext "$SYSTEM_EXT_MNT_RO" "$SYSTEM_EXT_MNT_RW" "$SYSTEM_EXT_MNT" || abort
+echo -e "Create overlayfs for EROFS done\n"
+
+echo "Remove read-only flag for read-only EXT4 image"
+    ro_ext4_img_to_rw "$WORK_DIR/wsa/$ARCH/system_ext.img" || abort
+    ro_ext4_img_to_rw "$WORK_DIR/wsa/$ARCH/product.img" || abort
+    ro_ext4_img_to_rw "$WORK_DIR/wsa/$ARCH/system.img" || abort
+    ro_ext4_img_to_rw "$WORK_DIR/wsa/$ARCH/vendor.img" || abort
+echo -e "Remove read-only flag for read-only EXT4 image done\n"
+    
 echo "Delect vhdx"
     rm -rf "$WORK_DIR/wsa/$ARCH/system_ext.vhdx"
     rm -rf "$WORK_DIR/wsa/$ARCH/product.vhdx"
