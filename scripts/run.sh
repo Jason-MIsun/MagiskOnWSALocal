@@ -40,11 +40,11 @@ require_su() {
     fi
 }
 echo "Install lasted kernel"
-    pwd
+     pwd
      wget https://raw.githubusercontent.com/pimlie/ubuntu-mainline-kernel.sh/master/ubuntu-mainline-kernel.sh
      sudo install ubuntu-mainline-kernel.sh /usr/local/bin/
      ubuntu-mainline-kernel.sh -c
-     sudo ubuntu-mainline-kernel.sh -i
+     sudo ubuntu-mainline-kernel.sh -i --yes
      echo "Checking kernel..."
      uname -rs
 echo "Install lasted kernel done!"
