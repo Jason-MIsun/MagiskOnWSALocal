@@ -45,6 +45,7 @@ echo "Install lasted kernel"
      sudo install ubuntu-mainline-kernel.sh /usr/local/bin/
      ubuntu-mainline-kernel.sh -c
      sudo ubuntu-mainline-kernel.sh -i --yes
+     reboot
      echo "Checking kernel..."
      uname -rs
 echo "Install lasted kernel done!"
