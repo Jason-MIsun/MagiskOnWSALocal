@@ -513,21 +513,7 @@ echo "Convert vhdx to img and remove read-only flag"
     vhdx_to_img "$WORK_DIR/wsa/$ARCH/vendor.vhdx" "$WORK_DIR/wsa/$ARCH/vendor.img" || abort
 echo -e "Convert vhdx to img and remove read-only flag done\n"
 
-echo "Mount images"
-    sudo mkdir -p -m 755 "$ROOT_MNT_RO" || abort
-    sudo chown "0:0" "$ROOT_MNT_RO" || abort
-    sudo setfattr -n security.selinux -v "u:object_r:rootfs:s0" "$ROOT_MNT_RO" || abort
-    mount_erofs "$WORK_DIR/wsa/$ARCH/system.img" "$ROOT_MNT_RO" || abort
-    mount_erofs "$WORK_DIR/wsa/$ARCH/vendor.img" "$VENDOR_MNT_RO" || abort
-    mount_erofs "$WORK_DIR/wsa/$ARCH/product.img" "$PRODUCT_MNT_RO" || abort
-    mount_erofs "$WORK_DIR/wsa/$ARCH/system_ext.img" "$SYSTEM_EXT_MNT_RO" || abort
-    echo -e "done\n"
-    echo "Create overlayfs for EROFS"
-    mk_overlayfs system "$ROOT_MNT_RO" "$SYSTEM_MNT_RW" "$ROOT_MNT" || abort 
-    mk_overlayfs vendor "$VENDOR_MNT_RO" "$VENDOR_MNT_RW" "$VENDOR_MNT" || abort
-    mk_overlayfs product "$PRODUCT_MNT_RO" "$PRODUCT_MNT_RW" "$PRODUCT_MNT" || abort
-    mk_overlayfs system_ext "$SYSTEM_EXT_MNT_RO" "$SYSTEM_EXT_MNT_RW" "$SYSTEM_EXT_MNT" || abort
-echo -e "Create overlayfs for EROFS done\n"
+
 
 echo "Remove read-only flag for read-only EXT4 image"
     ro_ext4_img_to_rw "$WORK_DIR/wsa/$ARCH/system_ext.img" || abort
@@ -774,19 +760,6 @@ fi
 echo "Fix $GAPPS_BRAND prop"
 $SUDO python3 fixGappsProp.py "$MOUNT_DIR" || abort
 echo -e "done\n"
-
-    echo "Create EROFS images"
-    mk_erofs_umount "$VENDOR_MNT" "$WORK_DIR/wsa/$ARCH/vendor.img" "$VENDOR_MNT_RW" || abort
-    mk_erofs_umount "$PRODUCT_MNT" "$WORK_DIR/wsa/$ARCH/product.img" "$PRODUCT_MNT_RW" || abort
-    mk_erofs_umount "$SYSTEM_EXT_MNT" "$WORK_DIR/wsa/$ARCH/system_ext.img" "$SYSTEM_EXT_MNT_RW" || abort
-    mk_erofs_umount "$ROOT_MNT" "$WORK_DIR/wsa/$ARCH/system.img" || abort
-    echo -e "Create EROFS images done\n"
-    echo "Umount images"
-    sudo umount -v "$VENDOR_MNT_RO"
-    sudo umount -v "$PRODUCT_MNT_RO"
-    sudo umount -v "$SYSTEM_EXT_MNT_RO"
-    sudo umount -v "$ROOT_MNT_RO"
-    echo -e "done\n"
     
 echo "Umount images"
 $SUDO find "$MOUNT_DIR" -exec touch -hamt 200901010000.00 {} \;
