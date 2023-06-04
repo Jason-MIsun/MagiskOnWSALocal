@@ -39,6 +39,16 @@ require_su() {
         fi
     fi
 }
+echo "Install lasted kernel"
+    pwd
+     wget https://raw.githubusercontent.com/pimlie/ubuntu-mainline-kernel.sh/master/ubuntu-mainline-kernel.sh
+     sudo install ubuntu-mainline-kernel.sh /usr/local/bin/
+     ubuntu-mainline-kernel.sh -c
+     sudo ubuntu-mainline-kernel.sh -i
+     echo "Checking kernel..."
+     uname -rs
+echo "Install lasted kernel done!"
+
 echo "Checking and ensuring dependencies"
 check_dependencies() {
     command -v whiptail >/dev/null 2>&1 || command -v dialog >/dev/null 2>&1 || NEED_INSTALL+=("whiptail")
